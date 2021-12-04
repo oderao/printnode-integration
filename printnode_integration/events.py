@@ -44,7 +44,8 @@ def on_update( doc, handler=None ):
 	
 def on_submit(doc, handler=None):
 	print((doc.doctype, doc.name, 'Submit'))
-	enqueue('printnode_integration.events.print_via_printnode', enqueue_after_commit=True, doctype=doc.doctype, docname=doc.name, docevent='Submit', now=True)
+	if doc.print_on_submit:
+		enqueue('printnode_integration.events.print_via_printnode', enqueue_after_commit=True, doctype=doc.doctype, docname=doc.name, docevent='Submit', now=True)
 
 def on_trash(doc, handler=None):
 	settings = frappe.get_doc('Print Node Settings', 'Print Node Settings')
