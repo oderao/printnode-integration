@@ -91,7 +91,8 @@ def get_print_content(print_format, doctype, docname, is_escpos=False, is_raw=Fa
 
     # frappe.msgprint("<pre>%s</pre>" %raw)
 
-    return b64encode(raw)
+    #return b64encode(raw)
+    return b64encode(raw).decode()
 
 
 @frappe.whitelist()
