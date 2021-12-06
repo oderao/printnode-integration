@@ -121,7 +121,6 @@ frappe.ui.form.ScriptManager = frappe.ui.form.ScriptManager.extend({
 											print_attachment(row);
 										}
 									};
-									let btn = cur_frm.add_custom_button(row.action, handler, __('Print Node Integration'));
 									if (row.hotkey && row.hotkey.length){
 										frappe.ui.keys.on(row.hotkey, function(){
 											handler();

@@ -16,48 +16,61 @@ capabilities = [
 ]
 
 class PrintNodeSettings(Document):
-	def validate(self):
-		self.hardware = ""
-		gw = Gateway(apikey=self.api_key)
+	pass
+	
+@frappe.whitelist()
+def update_hardware_table(doc):
+	if isinstance(doc,str):
+		doc = frappe.get_doc('Print Node Settings')		
+	
+	gw = Gateway(apikey=doc.get_password(fieldname='api_key'))
 
-		hardware = []
+	hardware = []
 
-		pcs = []
-		for computer in gw.computers():
-			pcs.append(computer)
+	pcs = []
+	for computer in gw.computers():
+		pcs.append(computer)
+		hardware.append({
+			"hw_type": "Computer",
+			"hw_id": computer.id,
+			"hw_name": computer.name,
+			"description": computer.hostname,
+			"status": computer.state.title()
+		})
+
+	for printer in gw.printers():
+		hardware.append({
+			"hw_type": "Printer",
+			"hw_id": printer.id,
+			"hw_name": printer.name,
+			"computer": printer.computer.name,
+			"description": printer.description,
+			"status": printer.state.title(),
+			"capabilities": json.dumps(OrderedDict(zip(capabilities, printer.capabilities))) if printer.capabilities else ""
+		})
+
+	for pc in pcs:
+		for scale in gw.scales(pc.id):
 			hardware.append({
-				"hw_type": "Computer",
-				"hw_id": computer.id,
-				"hw_name": computer.name,
-				"description": computer.hostname,
-				"status": computer.state.title()
+				"hw_type": "Scale",
+				"hw_id": scale.product_id,
+				"hw_name": scale.device_name,
+				"computer": pc.name
 			})
 
-		for printer in gw.printers():
-			hardware.append({
-				"hw_type": "Printer",
-				"hw_id": printer.id,
-				"hw_name": printer.name,
-				"computer": printer.computer.name,
-				"description": printer.description,
-				"status": printer.state.title(),
-				"capabilities": json.dumps(OrderedDict(zip(capabilities, printer.capabilities))) if printer.capabilities else ""
-			})
-
-		for pc in pcs:
-			for scale in gw.scales(pc.id):
-				hardware.append({
-					"hw_type": "Scale",
-					"hw_id": scale.product_id,
-					"hw_name": scale.device_name,
-					"computer": pc.name
-				})
-
-		frappe.db.sql("DELETE FROM `tabPrint Node Hardware`");
-
-		for h in hardware:
+	#frappe.db.sql("DELETE FROM `tabPrint Node Hardware`");
+	for h in hardware:
+		try:
 			frappe.new_doc("Print Node Hardware").update(h).insert()
 			if "capabilities" in h:
 				h.pop("capabilities")
-		
-		self.hardware = json.dumps(hardware)
+		except frappe.exceptions.DuplicateEntryError:
+			
+			frappe.clear_messages()
+			continue
+			
+	
+	doc.hardware = json.dumps(hardware)
+	doc.save()
+	frappe.db.commit()
+

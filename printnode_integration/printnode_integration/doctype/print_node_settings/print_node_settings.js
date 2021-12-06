@@ -30,6 +30,21 @@ frappe.ui.form.on('Print Node Settings', {
 		});
 	},
 	refresh: function(frm) {
+		frm.refresh_field('hardware_html')
+		frm.add_custom_button(__('Refresh Printer List'),function(){
+			frappe.call({
+				'method':'printnode_integration.printnode_integration.doctype.print_node_settings.print_node_settings.update_hardware_table',
+				
+				args: {
+					'doc':cur_frm.doc
+				},
+				callback:function(){
+					frm.refresh_field('hardware_html')
+					
+
+				}
+			})
+		})
 		var icons = {
 			"Online": '<i class="octicon octicon-issue-closed text-success"></i>',
 			"Disconnected": '<i class="octicon octicon-issue text-danger"></i>',
@@ -61,6 +76,7 @@ frappe.ui.form.on('Print Node Settings', {
 		{% } %}\
 	</tbody>\
 </table>';
+		
 		frm.fields_dict.hardware_html.$wrapper.empty();
 		if (frm.doc.hardware && frm.doc.hardware.length){
 			$(frappe.render(template, {
@@ -68,6 +84,7 @@ frappe.ui.form.on('Print Node Settings', {
 				icons: icons
 			})).appendTo(frm.fields_dict.hardware_html.$wrapper);
 		}
+		
 	}
 });
 
