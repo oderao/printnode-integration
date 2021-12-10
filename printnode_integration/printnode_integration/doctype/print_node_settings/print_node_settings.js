@@ -30,21 +30,6 @@ frappe.ui.form.on('Print Node Settings', {
 		});
 	},
 	refresh: function(frm) {
-		frm.refresh_field('hardware_html')
-		frm.add_custom_button(__('Refresh Printer List'),function(){
-			frappe.call({
-				'method':'printnode_integration.printnode_integration.doctype.print_node_settings.print_node_settings.update_hardware_table',
-				
-				args: {
-					'doc':cur_frm.doc
-				},
-				callback:function(){
-					frm.refresh_field('hardware_html')
-					
-
-				}
-			})
-		})
 		var icons = {
 			"Online": '<i class="octicon octicon-issue-closed text-success"></i>',
 			"Disconnected": '<i class="octicon octicon-issue text-danger"></i>',
@@ -75,8 +60,7 @@ frappe.ui.form.on('Print Node Settings', {
 		</tr>\
 		{% } %}\
 	</tbody>\
-</table>';
-		
+	</table>';
 		frm.fields_dict.hardware_html.$wrapper.empty();
 		if (frm.doc.hardware && frm.doc.hardware.length){
 			$(frappe.render(template, {
@@ -84,6 +68,65 @@ frappe.ui.form.on('Print Node Settings', {
 				icons: icons
 			})).appendTo(frm.fields_dict.hardware_html.$wrapper);
 		}
+		frm.refresh_field('hardware_html')
+		frm.add_custom_button(__('Refresh Printer List'),function(){
+			frappe.call({
+				'method':'printnode_integration.printnode_integration.doctype.print_node_settings.print_node_settings.update_hardware_table',
+				
+				args: {
+					'doc':cur_frm.doc
+				},
+				callback:function(r){
+					console.log(r)
+					var icons = {
+						"Online": '<i class="octicon octicon-issue-closed text-success"></i>',
+						"Disconnected": '<i class="octicon octicon-issue text-danger"></i>',
+						"Created": '<i class="octicon octicon-issue text-danger"></i>',
+						"Printer": '<i class="icon icon-print"></i>',
+						"Computer": '<i class="octicon octicon-device-desktop"></i>',
+						"Scale": '<i class="octicon octicon-dashboard"></i>'
+					}
+					,template = '<table class="table table-condensed table-bordered">\
+				<thead>\
+					<tr class="text-center">\
+					<th>&nbsp;</th>\
+					<th>{{ __("Name") }}</th>\
+					<th>{{ __("Computer") }}</th>\
+					<th>{{ __("Device") }}</th>\
+					<th>{{ __("Status") }}</th>\
+					</tr>\
+				</thead>\
+				<tbody>\
+					{% for (var i in rows) { %}\
+					<tr>\
+					{% var row = rows[i]; %}\
+					<th class="text-right">{{ parseInt(i)+1 }}</th>\
+					<td>{{ row.hw_name }}</td>\
+					<td>{{ row.computer }}</td>\
+					<td class="text-center">{{ icons[row.hw_type] }}</td>\
+					<td class="text-center">{{ icons[row.status] }}</td>\
+					</tr>\
+					{% } %}\
+				</tbody>\
+				</table>';
+					frm.fields_dict.hardware_html.$wrapper.empty();
+					if (r.message && r.message.length){
+						$(frappe.render(template, {
+							rows: JSON.parse(r.message),
+							icons: icons
+						})).appendTo(frm.fields_dict.hardware_html.$wrapper);
+					}
+					cur_frm.reload_doc()
+				}
+				
+			})
+			//frm.refresh_field('hardware_html')
+
+			
+		})
+		
+		
+		
 		
 	}
 });

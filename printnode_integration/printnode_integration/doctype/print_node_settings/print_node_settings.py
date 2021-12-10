@@ -58,19 +58,22 @@ def update_hardware_table(doc):
 				"computer": pc.name
 			})
 
-	#frappe.db.sql("DELETE FROM `tabPrint Node Hardware`");
+	#get existing doc hardware
+	doc_hardware = []
+	frappe.db.sql("DELETE FROM `tabPrint Node Hardware`")
 	for h in hardware:
 		try:
+			
+			
 			frappe.new_doc("Print Node Hardware").update(h).insert()
 			if "capabilities" in h:
 				h.pop("capabilities")
 		except frappe.exceptions.DuplicateEntryError:
-			
 			frappe.clear_messages()
 			continue
-			
-	
+
 	doc.hardware = json.dumps(hardware)
 	doc.save()
 	frappe.db.commit()
+	return doc.hardware
 

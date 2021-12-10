@@ -98,6 +98,7 @@ def get_print_content(print_format, doctype, docname, is_escpos=False, is_raw=Fa
 @frappe.whitelist()
 def print_via_printnode(action, **kwargs):
     settings = frappe.get_doc("Print Node Settings", "Print Node Settings")
+    api_key  = settings.get_password(fieldname='api_key')
     if not settings.api_key:
         frappe.throw(
             _("Your Print Node API Key is not configured in Print Node Settings")
@@ -121,7 +122,7 @@ def print_via_printnode(action, **kwargs):
 
     printer = frappe.db.get_value("Print Node Hardware", action.printer, "hw_id")
 
-    gateway = Gateway(apikey=settings.api_key)
+    gateway = Gateway(apikey=api_key)
 
     if action.printable_type == "Print Format":
         print_content = get_print_content(

@@ -22,7 +22,7 @@ def print_via_printnode( doctype, docname, docevent):
 	if not frappe.db.exists("Print Node Action", {"dt": doc.doctype, "print_on": docevent}):
 		return
 
-	for d in frappe.get_list("Print Node Action", ["name", "ensure_single_print", "allow_inline_batch", "batch_field"], {"dt": doc.doctype, "print_on": docevent}):
+	for d in frappe.get_list("Print Node Action", ["name", "ensure_single_print", "allow_inline_batch", "batch_field"], {"dt": doc.doctype, "print_on": docevent,'location':doc.location,'active':1}):
 		if docevent == "Update" and d.ensure_single_print and frappe.db.exists("Print Job", d.name):
 			continue
 		if not d.allow_inline_batch:
