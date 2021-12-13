@@ -6,6 +6,7 @@ import frappe
 from frappe.utils.background_jobs import enqueue
 from . import api
 
+@frappe.whitelist()
 def print_via_printnode( doctype, docname, docevent):
 	if frappe.flags.in_patch or frappe.flags.in_import:
 		return
