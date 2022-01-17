@@ -70,13 +70,16 @@ class Configuration(object):
     pass
 
 
-def get_print_content(print_format, doctype, docname, is_escpos=False, is_raw=False):
+def get_print_content(print_format, doctype, docname, is_escpos=False, is_raw=False,use_html=False):
+    doc = frappe.get_doc(doctype, docname)
     if is_escpos or is_raw:
-        doc = frappe.get_doc(doctype, docname)
         template = frappe.db.get_value("Print Format", print_format, "html")
         content = render_template(template, {"doc": doc})
         if is_escpos:
             content.replace("<br>", "<br/>")
+    elif use_html:
+        template = frappe.db.get_value("Print Format", print_format, "html")
+        content = render_template(template, {"doc": doc})
     else:
         content = frappe.get_print(doctype, docname, print_format)
 
@@ -90,8 +93,8 @@ def get_print_content(print_format, doctype, docname, is_escpos=False, is_raw=Fa
         raw = get_pdf(content)
 
     # frappe.msgprint("<pre>%s</pre>" %raw)
-
-    #return b64encode(raw)
+    if isinstance(raw,str):
+        raw = bytes(raw, 'utf-8')
     return b64encode(raw).decode()
 
 
@@ -130,7 +133,8 @@ def print_via_printnode(action, **kwargs):
             kwargs.get("doctype"),
             kwargs.get("docname"),
             action.is_xml_esc_pos,
-            action.is_raw_text
+            action.is_raw_text,
+            action.use_html
         )
         raw = action.is_xml_esc_pos or action.is_raw_text
         gateway.PrintJob(
