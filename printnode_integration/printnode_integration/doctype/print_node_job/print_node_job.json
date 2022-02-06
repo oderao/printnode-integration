@@ -18,7 +18,8 @@
   "print_job_name",
   "copies",
   "job_owner",
-  "print_timestamp"
+  "print_timestamp",
+  "print_on"
  ],
  "fields": [
   {
@@ -124,10 +125,16 @@
    "fieldtype": "Datetime",
    "label": "Print Timestamp",
    "read_only": 1
+  },
+  {
+   "fieldname": "print_on",
+   "fieldtype": "Data",
+   "label": "Print On",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2021-12-10 07:34:10.973995",
+ "modified": "2022-01-30 19:43:27.372178",
  "modified_by": "Administrator",
  "module": "Printnode Integration",
  "name": "Print Node Job",

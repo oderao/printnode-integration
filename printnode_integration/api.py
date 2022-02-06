@@ -26,6 +26,7 @@ except ImportError:
 from frappe.utils.jinja import render_template
 from frappe.utils.data import scrub_urls
 from frappe.utils.pdf import get_pdf
+from ctc.utils import get_pdf_mod
 try:
 	from xmlescpos.escpos import Escpos, StyleStack
 except ImportError:
@@ -70,8 +71,9 @@ class Configuration(object):
     pass
 
 
-def get_print_content(print_format, doctype, docname, is_escpos=False, is_raw=False,use_html=False):
+def get_print_content(print_format, doctype, docname, is_escpos=False, is_raw=False,use_html=False,page_width=0,page_height=0):
     doc = frappe.get_doc(doctype, docname)
+    output = None
     if is_escpos or is_raw:
         template = frappe.db.get_value("Print Format", print_format, "html")
         content = render_template(template, {"doc": doc})
@@ -83,6 +85,11 @@ def get_print_content(print_format, doctype, docname, is_escpos=False, is_raw=Fa
     else:
         content = frappe.get_print(doctype, docname, print_format)
 
+    if use_html:
+        output = {"print-height":page_height,"page-width":page_width}
+        generate_pdf = get_pdf_mod
+    else:
+        generate_pdf = get_pdf
     if is_escpos:
         printer = IOPrinter()
         printer.receipt(content)
@@ -90,7 +97,7 @@ def get_print_content(print_format, doctype, docname, is_escpos=False, is_raw=Fa
     elif is_raw:
         raw = content
     else:
-        raw = get_pdf(content)
+        raw = generate_pdf(content,output=output)
 
     # frappe.msgprint("<pre>%s</pre>" %raw)
     if isinstance(raw,str):
@@ -134,7 +141,9 @@ def print_via_printnode(action, **kwargs):
             kwargs.get("docname"),
             action.is_xml_esc_pos,
             action.is_raw_text,
-            action.use_html
+            action.use_html,
+            action.page_width,
+            action.page_height
         )
         raw = action.is_xml_esc_pos or action.is_raw_text
         gateway.PrintJob(
@@ -166,7 +175,8 @@ def print_via_printnode(action, **kwargs):
         "print_job_name": action.action,
         "copies": print_settings.get('copies', 1),
         "job_owner": frappe.local.session.user,
-        "print_timestamp": now_datetime()
+        "print_timestamp": now_datetime(),
+        "print_on":action.print_on
     })
     job.flags.ignore_permissions = True
     job.flags.ignore_links = True

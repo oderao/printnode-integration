@@ -5,6 +5,7 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "user",
   "dt",
   "printable_type",
   "use_standard",
@@ -15,6 +16,9 @@
   "is_xml_esc_pos",
   "is_raw_text",
   "use_html",
+  "page_height",
+  "page_width",
+  "page_layout",
   "print_on",
   "ensure_single_print",
   "attachment_pattern",
@@ -24,9 +28,13 @@
   "action",
   "active",
   "set_print_job_options",
-  "capabilities",
   "display_rule",
-  "depends_on"
+  "depends_on",
+  "capabilities_section_section",
+  "get_capabilities",
+  "capabilities_select",
+  "value",
+  "capabilities"
  ],
  "fields": [
   {
@@ -93,7 +101,7 @@
    "fieldname": "print_on",
    "fieldtype": "Select",
    "label": "Call Print After",
-   "options": "\nInsert\nUpdate\nSubmit\nTested"
+   "options": "\nInsert\nUpdate\nSubmit\nTested\nPOS"
   },
   {
    "default": "0",
@@ -140,9 +148,8 @@
   },
   {
    "fieldname": "capabilities",
-   "fieldtype": "Code",
-   "hidden": 1,
-   "label": "Capabilties"
+   "fieldtype": "Data",
+   "label": "Capabilities Object"
   },
   {
    "collapsible": 1,
@@ -175,11 +182,61 @@
    "fieldname": "use_html",
    "fieldtype": "Check",
    "label": "Use HTML"
+  },
+  {
+   "fieldname": "capabilities_section_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Capabilities Section"
+  },
+  {
+   "fieldname": "value",
+   "fieldtype": "Data",
+   "label": "Value"
+  },
+  {
+   "fieldname": "get_capabilities",
+   "fieldtype": "Button",
+   "label": "Get Capabilities"
+  },
+  {
+   "fieldname": "capabilities_select",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Capabilties",
+   "options": "\nbins\ncollate\ncopies\ncolor\ndpis\nextend\nmedias\nnup\nprintrate\npapers\nsupport_custom_paper_size"
+  },
+  {
+   "depends_on": "eval:doc.use_html==1",
+   "fieldname": "page_height",
+   "fieldtype": "Int",
+   "label": "Page Height",
+   "mandatory_depends_on": "eval:doc.use_html==1"
+  },
+  {
+   "depends_on": "eval:doc.use_html==1",
+   "fieldname": "page_width",
+   "fieldtype": "Int",
+   "label": "Page Width",
+   "mandatory_depends_on": "eval:doc.use_html==1"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User"
+  },
+  {
+   "fieldname": "page_layout",
+   "fieldtype": "Select",
+   "label": "Page Layout",
+   "options": "\npotrait\nlandscape"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-01-11 08:41:18.492457",
+ "modified": "2022-01-31 19:58:00.917054",
  "modified_by": "Administrator",
  "module": "Printnode Integration",
  "name": "Print Node Action",

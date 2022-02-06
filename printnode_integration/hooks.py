@@ -71,7 +71,7 @@ app_include_js = "/assets/printnode_integration/js/printnode_integration.js"
 # Hook on document methods and events
 
 doc_events = {
-	"*": {
+	"CTC Lab Test": {
 		"after_insert": "printnode_integration.events.after_insert",
 		"on_update": "printnode_integration.events.on_update",
 		"on_submit": "printnode_integration.events.on_submit",

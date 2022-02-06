@@ -12,7 +12,7 @@ from frappe.model.document import Document
 
 capabilities = [
 	"bins", "colate", "copies", "color", "dpis", "extend",
-	"medias", "nup", "papers", "printrate", "support_custom_paper_size"
+	"medias", "nup", "printrate", "papers" ,"support_custom_paper_size"
 ]
 
 class PrintNodeSettings(Document):
@@ -46,7 +46,7 @@ def update_hardware_table(doc):
 			"computer": printer.computer.name,
 			"description": printer.description,
 			"status": printer.state.title(),
-			"capabilities": json.dumps(OrderedDict(zip(capabilities, printer.capabilities))) if printer.capabilities else ""
+			"capabilities": json.dumps(OrderedDict(zip(capabilities, printer.capabilities)),indent=4) if printer.capabilities else ""
 		})
 
 	for pc in pcs:
@@ -63,11 +63,9 @@ def update_hardware_table(doc):
 	frappe.db.sql("DELETE FROM `tabPrint Node Hardware`")
 	for h in hardware:
 		try:
-			
-			
 			frappe.new_doc("Print Node Hardware").update(h).insert()
-			if "capabilities" in h:
-				h.pop("capabilities")
+			# if "capabilities" in h:
+			# 	h.pop("capabilities")
 		except frappe.exceptions.DuplicateEntryError:
 			frappe.clear_messages()
 			continue

@@ -22,8 +22,12 @@ def print_via_printnode( doctype, docname, docevent):
 
 	if not frappe.db.exists("Print Node Action", {"dt": doc.doctype, "print_on": docevent}):
 		return
+	if 'Administrator' in frappe.get_roles(frappe.session.user):
 
-	for d in frappe.get_list("Print Node Action", ["name", "ensure_single_print", "allow_inline_batch", "batch_field"], {"dt": doc.doctype, "print_on": docevent,'location':doc.location,'active':1}):
+		action_list = frappe.get_list("Print Node Action", ["name", "ensure_single_print", "allow_inline_batch", "batch_field"], {"dt": doc.doctype, "print_on": docevent,'location':doc.get('location'),'active':1})
+	else:
+		action_list = frappe.get_list("Print Node Action", ["name", "ensure_single_print", "allow_inline_batch", "batch_field"], {"dt": doc.doctype, "print_on": docevent,'location':doc.get('location'),'active':1,'user':frappe.session.user})
+	for d in action_list:
 		if docevent == "Update" and d.ensure_single_print and frappe.db.exists("Print Job", d.name):
 			continue
 		if not d.allow_inline_batch:
@@ -44,7 +48,6 @@ def on_update( doc, handler=None ):
 	enqueue('printnode_integration.events.print_via_printnode', enqueue_after_commit=True, doctype=doc.doctype, docname=doc.name, docevent='Update', now=True)
 	
 def on_submit(doc, handler=None):
-	print((doc.doctype, doc.name, 'Submit'))
 	if doc.print_on_submit:
 		enqueue('printnode_integration.events.print_via_printnode', enqueue_after_commit=True, doctype=doc.doctype, docname=doc.name, docevent='Submit', now=True)
 
